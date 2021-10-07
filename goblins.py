@@ -1,6 +1,6 @@
 import random
 from prettytable import PrettyTable
-
+from termcolor import colored
 
 NAMES = [
     'Рогнар', 'Гайрил', 'Харвельд',
@@ -20,8 +20,8 @@ class Goblin:
         return f'<Goblin({self.name}, {self.hp}, {self.dmg}, {self.crit_mult})>'
 
     def __str__(self):
-        return f'Имя гоблина: {self.name}.\n'\
-               f'ОЗ: {self.hp}, урон: {self.dmg}'\
+        return f'Имя гоблина: {self.name}.\n' \
+               f'ОЗ: {self.hp}, урон: {self.dmg}' \
                f'Шанс крита: {self.crit_chance}'
 
     def attack_dmg(self):
@@ -30,7 +30,7 @@ class Goblin:
         crit_chance = random.randint(1, 100)
         crit = False
         if crit_chance <= self.crit_chance:
-            print('Крит!')
+            print(colored('Крит!', 'red'))
             crit = True
             dmg *= self.crit_mult
         return dmg, crit
@@ -60,8 +60,7 @@ class BattleOfGoblins2000:
 
     def run(self):
         self.turn = 0
-        print(self.g1)
-        print(self.g2)
+        print(self.print_table())
         print()
         while self.g1.is_awake() and self.g2.is_awake():
             self.turn += 1
@@ -74,7 +73,12 @@ class BattleOfGoblins2000:
                 self.attack(self.g2, self.g1)
                 self.attack(self.g1, self.g2)
             print()
-        self.result()
+        if self.g1.is_awake():
+            print(f'{self.g1.name} сторожит')
+            print(f'{self.g2.name} уснул')
+        else:
+            print(f'{self.g2.name} сторожит')
+            print(f'{self.g1.name} уснул')
 
     def attack(self, attacker, defender):
         if not attacker.is_awake():
@@ -83,31 +87,26 @@ class BattleOfGoblins2000:
         if defender.dodge():
             dmg = defender.get_base_dmg()
             attacker.get_dmg(dmg)
-            print(f'{defender.name} уклонился и контр-ударил {attacker.name}'\
-                  f' с силой {dmg}')
+            print(colored(f'{defender.name} уклонился и контр-ударил {attacker.name}', 'red'), \
+                  colored(f' с силой {dmg}', 'red'), sep='')
             print(f'У {attacker.name} осталось {attacker.hp} ОЗ')
         else:
             defender.get_dmg(dmg)
-            print(f'{attacker.name} ударил {defender.name}'\
+            print(f'{attacker.name} ударил {defender.name}' \
                   f' с силой {dmg}')
             print(f'У {defender.name} осталось {defender.hp} ОЗ')
 
-    def result(self):
-        if self.g1.is_awake():
-            print(f'{self.g2.name} Уснул')
-        else:
-            print(f'{self.g1.name} Уснул')
-
     def print_table(self):
         mytable = PrettyTable()
-        mytable.field_names = ["Имя", "Урон", "ОЗ", "Множитель урона"]
+        mytable.field_names = ["Имя", "Урон", "ОЗ", "Шанс крита", "Множитель урона"]
         mytable.add_rows([
-            [self.g1.name, self.g1.dmg, self.g1.hp, self.g1.critical_damage],
-            [self.g2.name, self.g2.dmg, self.g2.hp, self.g2.critical_damage]
+            [self.g1.name, self.g1.dmg, self.g1.hp, self.g1.crit_chance, self.g1.crit_mult],
+            [self.g2.name, self.g2.dmg, self.g2.hp, self.g2.crit_chance, self.g2.crit_mult]
         ])
         return mytable
 
 
 if __name__ == '__main__':
-    BattleOfGoblins2000().run()
+    game = BattleOfGoblins2000()
+    game.run()
 
